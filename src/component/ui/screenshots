@@ -1,1 +1,10 @@
-
+ai_agent_commerce_platform/
+├── src/
+│   ├── components/
+│   ├── App.tsx
+│   └── main.tsx
+├── package.json
+├── vite.config.ts
+├── README.md
+├── .gitignore
+└── LICENSE
