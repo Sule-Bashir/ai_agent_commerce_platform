@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArrowRight, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowRight, ExternalLink, CheckCircle2, AlertCircle, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AgentState } from '@/types/agent'
 import type { Payment402Response } from '@/lib/http402'
@@ -11,6 +11,8 @@ interface PaymentFlowProps {
   state: AgentState
   payment402Data: Payment402Response | null
   txHash: string | null
+  serviceData: any
+  transactionMode?: 'real' | 'simulation'
   onApprovePayment: () => void
   className?: string
 }
@@ -26,6 +28,8 @@ export function PaymentFlow({
   state, 
   payment402Data, 
   txHash,
+  serviceData,
+  transactionMode = 'simulation',
   onApprovePayment,
   className 
 }: PaymentFlowProps) {
@@ -33,44 +37,65 @@ export function PaymentFlow({
     step.states.includes(state)
   )
 
+  const isUnlocked = state === 'success' || serviceData !== null
+
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Payment Flow (HTTP 402 Protocol)</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Payment Flow (HTTP 402 Protocol)</CardTitle>
+          <Badge variant={transactionMode === 'real' ? "default" : "outline"}>
+            {transactionMode === 'real' ? (
+              <span className="flex items-center gap-1">
+                <Zap className="h-3 w-3" />
+                Real Transaction
+              </span>
+            ) : 'Simulation'}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Flow Visualization */}
         <div className="flex items-center justify-between">
-          {flowSteps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all",
-                  index < currentStepIndex && "border-success bg-success/20",
-                  index === currentStepIndex && "border-accent bg-accent/20 animate-pulse-glow",
-                  index > currentStepIndex && "border-muted bg-muted/20"
-                )}>
-                  {index < currentStepIndex ? (
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                  ) : (
-                    <span className="text-sm font-bold">{index + 1}</span>
-                  )}
+          {flowSteps.map((step, index) => {
+            const isActive = index === currentStepIndex || 
+                           (index === 3 && isUnlocked)
+
+            const isCompleted = index < currentStepIndex || 
+                              (isUnlocked && index < 3) ||
+                              (index === 3 && isUnlocked)
+
+            return (
+              <div key={step.id} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all",
+                    isCompleted && "border-green-500 bg-green-500/20",
+                    isActive && "border-accent bg-accent/20 animate-pulse",
+                    !isCompleted && !isActive && "border-gray-300 bg-gray-50"
+                  )}>
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-6 w-6 text-green-500" />
+                    ) : (
+                      <span className="text-sm font-bold">{index + 1}</span>
+                    )}
+                  </div>
+                  <span className={cn(
+                    "text-xs mt-2 font-medium",
+                    isActive || isCompleted ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {step.label}
+                  </span>
                 </div>
-                <span className={cn(
-                  "text-xs mt-2 font-medium",
-                  index <= currentStepIndex ? "text-foreground" : "text-muted-foreground"
-                )}>
-                  {step.label}
-                </span>
+                {index < flowSteps.length - 1 && (
+                  <ArrowRight className={cn(
+                    "h-5 w-5 mx-2",
+                    isCompleted ? "text-green-500" : "text-gray-300"
+                  )} />
+                )}
               </div>
-              {index < flowSteps.length - 1 && (
-                <ArrowRight className={cn(
-                  "h-5 w-5 mx-2",
-                  index < currentStepIndex ? "text-success" : "text-muted-foreground"
-                )} />
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Payment Details */}
@@ -99,6 +124,12 @@ export function PaymentFlow({
                     <span className="text-muted-foreground">Reference:</span>
                     <span className="text-xs">{payment402Data.payment.reference}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Mode:</span>
+                    <Badge variant={transactionMode === 'real' ? "success" : "outline"} className="text-xs">
+                      {transactionMode === 'real' ? 'Real USDC' : 'Simulation'}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </AlertDescription>
@@ -108,38 +139,79 @@ export function PaymentFlow({
         {/* Approval Button */}
         {state === 'payment-required' && (
           <Button
-            variant="accent"
+            variant={transactionMode === 'real' ? "default" : "accent"}
             size="lg"
-            className="w-full"
+            className="w-full gap-2"
             onClick={onApprovePayment}
           >
-            Approve Payment (Agent Will Execute)
+            {transactionMode === 'real' ? (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                Approve Real Payment ({payment402Data?.payment.amount} USDC)
+              </>
+            ) : (
+              'Approve Payment (Simulation)'
+            )}
           </Button>
         )}
 
         {/* Transaction Hash */}
-        {txHash && (
+        {txHash && !isUnlocked && (
           <Alert variant="success">
             <AlertDescription>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span className="font-medium">Transaction Submitted</span>
+                  <span className="font-medium">
+                    {transactionMode === 'real' ? 'Transaction Submitted' : 'Simulation Submitted'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <code className="text-xs font-mono">
                     {txHash.slice(0, 10)}...{txHash.slice(-8)}
                   </code>
+                  {transactionMode === 'real' && (
+                    <a
+                      href={`https://testnet.arcscan.app/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs text-accent hover:underline"
+                    >
+                      View on ArcScan
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Service Unlocked Message */}
+        {isUnlocked && (
+          <Alert variant="success">
+            <AlertDescription>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span className="font-medium">Service Unlocked</span>
+                </div>
+                <p className="text-sm mt-1">
+                  {transactionMode === 'real' 
+                    ? 'Payment verified on-chain. Service content delivered to agent.' 
+                    : 'Payment simulation completed. Service content delivered.'}
+                </p>
+                {transactionMode === 'real' && txHash && (
                   <a
                     href={`https://testnet.arcscan.app/tx/${txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-accent hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-accent hover:underline mt-2"
                   >
-                    View on ArcScan
+                    View transaction on ArcScan
                     <ExternalLink className="h-3 w-3" />
                   </a>
-                </div>
+                )}
               </div>
             </AlertDescription>
           </Alert>
