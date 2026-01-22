@@ -8,7 +8,7 @@ AI Agent Commerce Platform for the Arc Hackathon. Demonstrates autonomous HTTP 4
 https://a1c7c916-3118-4c87-99b8-7a0dffdd3414-00-kntziqybqlpu.janeway.replit.dev/
 
 https://replit.com/@sulebashir001/aiagentcommerceplatformNew
-Copy the first URL into Metamask App browser, connect wallet, Update is RPC and get started 
+Copy the first URL into Metamask App browser, connect wallet, Update it RPC and get started 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/hackathon-Arc%20%2B%20Circle-orange)](https://lablab.ai)
 
@@ -28,7 +28,7 @@ A functional prototype showcasing how AI agents can autonomously purchase APIs a
 **Experience the demo:** [Live App on Replit](https://a1c7c916-3118-4c87-99b8-7a0dffdd3414-00-kntziqybqlpu.janeway.replit.dev/)
 https://replit.com/@sulebashir001/aiagentcommerceplatformNew
 
-Copy the first URL into Metamask App browser, connect wallet, Update is RPC and get started 
+Copy the first URL into Metamask App browser, connect wallet, Update it RPC and get started 
 
 ## 📱 App Usage Instructions
 
