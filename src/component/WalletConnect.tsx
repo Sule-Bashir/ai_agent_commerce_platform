@@ -1,61 +1,68 @@
-import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from 'wagmi'
+import { useState, useEffect } from 'react'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { injected } from 'wagmi/connectors'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Spinner } from '@/components/ui/spinner'
-import { Wallet, LogOut, AlertTriangle } from 'lucide-react'
-import { NetworkArc } from '@web3icons/react'
 
 export function WalletConnect() {
+  const [isConnecting, setIsConnecting] = useState(false)
   const { address, isConnected } = useAccount()
-  const { connect, connectors, isPending } = useConnect()
+  const { connect } = useConnect()
   const { disconnect } = useDisconnect()
-  const chainId = useChainId()
-  const { switchChain } = useSwitchChain()
 
-  const isWrongNetwork = isConnected && chainId !== 5042002
+  const handleConnect = async () => {
+    setIsConnecting(true)
+    try {
+      // Small delay to prevent UI freeze
+      await new Promise(resolve => setTimeout(resolve, 300))
+      connect({ 
+        connector: injected({ target: 'metaMask' }),
+        onError: (error) => {
+          console.error('Connection error:', error)
+          setIsConnecting(false)
+        }
+      })
+    } catch (error) {
+      console.error('Connect failed:', error)
+      setIsConnecting(false)
+    }
+  }
+
+  const handleDisconnect = () => {
+    try {
+      disconnect()
+    } catch (error) {
+      console.error('Disconnect failed:', error)
+    }
+  }
+
+  // Auto-reset connecting state
+  useEffect(() => {
+    if (isConnected) {
+      setIsConnecting(false)
+    }
+  }, [isConnected])
 
   if (isConnected && address) {
     return (
-      <div className="flex items-center gap-3">
-        {isWrongNetwork ? (
-          <Button 
-            variant="destructive" 
-            size="sm"
-            onClick={() => switchChain({ chainId: 5042002 })}
-          >
-            <AlertTriangle className="h-4 w-4" />
-            Switch to Arc Testnet
-          </Button>
-        ) : (
-          <Badge variant="success" className="gap-2 px-3 py-1.5">
-            <NetworkArc size={14} variant="branded" />
-            <span className="font-mono text-xs">
-              {address.slice(0, 6)}...{address.slice(-4)}
-            </span>
-          </Badge>
-        )}
-        <Button variant="outline" size="icon" onClick={() => disconnect()}>
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </div>
+      <Button 
+        variant="outline"
+        onClick={handleDisconnect}
+        className="truncate max-w-[180px]"
+        title={address}
+      >
+        {address.slice(0, 6)}...{address.slice(-4)}
+      </Button>
     )
   }
 
-  const connector = connectors[0]
-
   return (
-    <Button variant="accent" onClick={() => connect({ connector })} disabled={isPending}>
-      {isPending ? (
-        <>
-          <Spinner size={16} />
-          Connecting...
-        </>
-      ) : (
-        <>
-          <Wallet className="h-4 w-4" />
-          Connect Wallet
-        </>
-      )}
+    <Button
+      variant="accent"
+      onClick={handleConnect}
+      disabled={isConnecting}
+      className="min-w-[140px]"
+    >
+      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
     </Button>
   )
 }
