@@ -1,4 +1,4 @@
-# ai_agent_commerce_platform
+ai_agent_commerce_platform
 AI Agent Commerce Platform for the Arc Hackathon. Demonstrates autonomous HTTP 402 micropayments with USDC on Arc Testnet.
 # 🤖 AI Agent Commerce Platform
 
@@ -84,7 +84,7 @@ src/
 - **Styling**: Tailwind CSS
 - **Hosting**: Replit (live demo)
 - **Blockchain**: Arc Testnet with USDC
-
+- Wallet| MetaMask (Circle-compatible) 
 ## 📝 Circle Product Feedback
 
 *(Required for hackathon submission – include this section in your lablab.ai description)*
@@ -104,7 +104,8 @@ src/
 ## 🔗 Links
 
 - **Live Demo**: [Replit App](https://a1c7c916-3118-4c87-99b8-7a0dffdd3414-00-kntziqybqlpu.janeway.replit.dev/)
-- **Video Demo**: [Your Video Link Here]
+- **Video Demo
+-  [Your Video Link Here]
 - **Hackathon Page**: [Agentic Commerce on Arc](https://lablab.ai)
 
 ## 📄 License
@@ -113,4 +114,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-*Built for the Agentic Commerce on Arc Hackathon • Powered by Circle & Arc Testnet*
+*Built for the Agentic Commerce on Arc Hackathon • Powered by Circle & Arc Testnet
