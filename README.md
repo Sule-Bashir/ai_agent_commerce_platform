@@ -105,7 +105,7 @@ src/
 
 - **Live Demo**: [Replit App](https://a1c7c916-3118-4c87-99b8-7a0dffdd3414-00-kntziqybqlpu.janeway.replit.dev/)
 - **Video Demo
--  [Your Video Link Here]
+-  https://www.loom.com/share/48be0272e1c64a4286942aa029d74ee6
 - **Hackathon Page**: [Agentic Commerce on Arc](https://lablab.ai)
 
 ## 📄 License
